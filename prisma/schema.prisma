@@ -32,6 +32,7 @@ model Equipment {
   cutSheetRef   String
   unitsPerHour  Float
   marginPerUnit Float
+  photoRef      String? // base filename under /public/homogenizer (e.g. "exterior.jpg")
   parts         Part[]
   tasks         MaintenanceTask[]
 }
@@ -49,6 +50,9 @@ model Part {
   nextDue             DateTime
   failureProbability  Float
   expectedDowntimeMin Int
+  whyAtRisk           String? // plain-language explanation of the wear mechanism
+  zone                String? // hotspot zone key for the interactive equipment view
+  imageRef            String? // base filename under /public/homogenizer (e.g. "plunger.jpg")
   tasks               MaintenanceTask[]
 }
 

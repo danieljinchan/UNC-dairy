@@ -13,17 +13,24 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="flex w-60 shrink-0 flex-col border-r border-slate-200 bg-white">
-      <div className="border-b border-slate-200 px-5 py-5">
-        <div className="text-sm font-bold uppercase tracking-wide text-slate-900">
-          Predictive
+    <aside className="flex w-64 shrink-0 flex-col bg-navy text-white">
+      <div className="px-6 py-7">
+        <div className="flex items-center gap-2.5">
+          <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-sky text-base font-extrabold text-navy">
+            UD
+          </span>
+          <div className="leading-tight">
+            <div className="text-lg font-extrabold tracking-tight">
+              UNC Dairy
+            </div>
+            <div className="text-[11px] font-medium uppercase tracking-wide text-sky">
+              Predictive Maintenance
+            </div>
+          </div>
         </div>
-        <div className="text-sm font-bold uppercase tracking-wide text-blue-600">
-          Maintenance
-        </div>
-        <div className="mt-1 text-xs text-slate-400">Dairy MVP</div>
       </div>
-      <nav className="flex flex-col gap-1 p-3">
+
+      <nav className="flex flex-col gap-1.5 px-4">
         {NAV.map((item) => {
           const active =
             item.href === "/"
@@ -33,10 +40,10 @@ export function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+              className={`rounded-2xl px-4 py-2.5 text-sm font-semibold transition-colors ${
                 active
-                  ? "bg-blue-50 text-blue-700"
-                  : "text-slate-600 hover:bg-slate-100"
+                  ? "bg-sky text-navy shadow-card"
+                  : "text-white/75 hover:bg-white/10 hover:text-white"
               }`}
             >
               {item.label}
@@ -44,8 +51,9 @@ export function Sidebar() {
           );
         })}
       </nav>
-      <div className="mt-auto border-t border-slate-200 px-5 py-4 text-xs text-slate-400">
-        Phase 1 MVP
+
+      <div className="mt-auto px-6 py-5 text-xs text-white/45">
+        Predictive Maintenance Platform
       </div>
     </aside>
   );

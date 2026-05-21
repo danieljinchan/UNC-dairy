@@ -4,16 +4,16 @@ import { getFacility, getTasks } from "@/lib/queries";
 export const dynamic = "force-dynamic";
 
 const LEGEND = [
-  { label: "Preventive (PM)", className: "bg-blue-500" },
-  { label: "Predicted Failure", className: "bg-red-600" },
-  { label: "Work Order", className: "bg-amber-500" },
+  { label: "Preventive (PM)", className: "bg-mid-blue" },
+  { label: "Predicted Failure", className: "bg-risk-red" },
+  { label: "Work Order", className: "bg-risk-amber" },
 ];
 
 export default async function CalendarPage() {
   const facility = await getFacility();
   if (!facility) {
     return (
-      <div className="rounded-lg border border-amber-200 bg-amber-50 p-6 text-amber-800">
+      <div className="rounded-2xl border border-risk-amber/30 bg-risk-amber/10 p-6 text-navy">
         No facility found. Run <code className="font-mono">npm run seed</code>{" "}
         to load sample data.
       </div>
@@ -35,16 +35,16 @@ export default async function CalendarPage() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-bold text-slate-900">
+        <h1 className="text-3xl font-bold tracking-tight text-navy">
           Maintenance Calendar
         </h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-2 text-sm text-navy/55">
           Scheduled maintenance tasks across {facility.name}. Click a task to
           open its equipment or part.
         </p>
       </header>
 
-      <div className="flex flex-wrap gap-4 text-sm text-slate-600">
+      <div className="flex flex-wrap gap-4 text-sm text-navy/65">
         {LEGEND.map((l) => (
           <div key={l.label} className="flex items-center gap-1.5">
             <span className={`h-3 w-3 rounded-full ${l.className}`} />

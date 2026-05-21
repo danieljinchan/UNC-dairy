@@ -36,15 +36,17 @@ async function main() {
   });
 
   // --- Pasteurization equipment ---
+  // Flagship interactive machine — gets the full zone/part/photo treatment.
   const homogenizer = await prisma.equipment.create({
     data: {
-      name: "Homogenizer",
-      manufacturer: "GEA Niro",
+      name: "Homogenizer HD-3 / GEA Ariete-class",
+      manufacturer: "GEA Ariete",
       processId: pasteurization.id,
       blueprintRef: "BP-HOM-2200.pdf",
       cutSheetRef: "CS-GEA-HOM.pdf",
       unitsPerHour: 4000,
       marginPerUnit: 0.42,
+      photoRef: "exterior.jpg",
     },
   });
   const htst = await prisma.equipment.create({
@@ -141,45 +143,176 @@ async function main() {
     nextDue: number; // days from now
     failureProbability: number;
     expectedDowntimeMin: number;
+    whyAtRisk?: string;
+    zone?: string; // hotspot zone key (see lib/homogenizer.ts)
+    imageRef?: string; // base filename under /public/homogenizer
   };
 
   const parts: PartSeed[] = [
-    // Homogenizer
+    // --- Homogenizer (flagship interactive machine) ---
+    // Zone: valve-head
     {
-      name: "Piston Seal Kit",
+      name: "Homogenizing valve seat",
       equipmentId: homogenizer.id,
-      partNumber: "GEA-PS-118",
+      partNumber: "GEA-VS-204",
       supplier: "GEA Parts Direct",
-      unitCost: 320,
-      leadTimeDays: 5,
-      lastReplaced: -210,
-      nextDue: 45,
-      failureProbability: 0.34,
-      expectedDowntimeMin: 90,
-    },
-    {
-      name: "Homogenizing Valve",
-      equipmentId: homogenizer.id,
-      partNumber: "GEA-HV-204",
-      supplier: "GEA Parts Direct",
-      unitCost: 1450,
-      leadTimeDays: 12,
-      lastReplaced: -400,
-      nextDue: 120,
-      failureProbability: 0.18,
+      unitCost: 720,
+      leadTimeDays: 8,
+      lastReplaced: -300,
+      nextDue: 65,
+      failureProbability: 0.44,
       expectedDowntimeMin: 150,
+      zone: "valve-head",
+      imageRef: "homogenizing-valve.jpg",
+      whyAtRisk:
+        "Erosion from product forced through the valve gap at 150-250 bar gradually rounds the sealing edge, widening the gap and degrading homogenization quality. Inspect every 250 run-hours; replace annually.",
     },
     {
-      name: "Drive Coupling",
+      name: "Valve ball",
       equipmentId: homogenizer.id,
-      partNumber: "GEA-DC-051",
-      supplier: "Motion Industries",
+      partNumber: "GEA-VB-205",
+      supplier: "GEA Parts Direct",
+      unitCost: 480,
+      leadTimeDays: 8,
+      lastReplaced: -300,
+      nextDue: 95,
+      failureProbability: 0.36,
+      expectedDowntimeMin: 120,
+      zone: "valve-head",
+      imageRef: "valve-assembly.jpg",
+      whyAtRisk:
+        "Fatigue and surface pitting build up under cyclic high-pressure loading. A pitted ball no longer seats cleanly, causing pressure instability. Replace annually.",
+    },
+    {
+      name: "Valve spring",
+      equipmentId: homogenizer.id,
+      partNumber: "GEA-VSP-206",
+      supplier: "GEA Parts Direct",
+      unitCost: 140,
+      leadTimeDays: 4,
+      lastReplaced: -300,
+      nextDue: 110,
+      failureProbability: 0.21,
+      expectedDowntimeMin: 90,
+      zone: "valve-head",
+      imageRef: "valve-assembly.jpg",
+      whyAtRisk:
+        "Repeated compression under cyclic high-pressure loading causes the spring to lose set and eventually crack. Weak springs reduce homogenizing pressure. Replace annually.",
+    },
+    // Zone: liquid-end
+    {
+      name: "Plunger packings (HP seals)",
+      equipmentId: homogenizer.id,
+      partNumber: "GEA-PP-118",
+      supplier: "GEA Parts Direct",
       unitCost: 240,
-      leadTimeDays: 3,
-      lastReplaced: -120,
-      nextDue: 200,
-      failureProbability: 0.09,
+      leadTimeDays: 5,
+      lastReplaced: -28,
+      nextDue: 4,
+      failureProbability: 0.81,
+      expectedDowntimeMin: 90,
+      zone: "liquid-end",
+      imageRef: "plunger-seal.jpg",
+      whyAtRisk:
+        "Continuous extreme pressure and friction against the reciprocating plunger wear these seals faster than any other part. Replace roughly monthly / every 250 run-hours — they are the leading cause of unplanned homogenizer leaks.",
+    },
+    {
+      name: "Plungers",
+      equipmentId: homogenizer.id,
+      partNumber: "GEA-PL-120",
+      supplier: "GEA Parts Direct",
+      unitCost: 1150,
+      leadTimeDays: 10,
+      lastReplaced: -260,
+      nextDue: 100,
+      failureProbability: 0.33,
+      expectedDowntimeMin: 180,
+      zone: "liquid-end",
+      imageRef: "plunger.jpg",
+      whyAtRisk:
+        "Surface scoring from abrasive product and constant seal contact roughens the polished plunger surface, which then chews through new packings prematurely. Inspect and replace annually.",
+    },
+    {
+      name: "Suction & discharge valve assembly",
+      equipmentId: homogenizer.id,
+      partNumber: "GEA-SDV-132",
+      supplier: "GEA Parts Direct",
+      unitCost: 620,
+      leadTimeDays: 7,
+      lastReplaced: -240,
+      nextDue: 130,
+      failureProbability: 0.29,
+      expectedDowntimeMin: 150,
+      zone: "liquid-end",
+      imageRef: "valve-assembly.jpg",
+      whyAtRisk:
+        "Seat wear and spring fatigue from constant cycling cause the check valves to leak back, reducing flow and pressure. Replace annually.",
+    },
+    {
+      name: "Plunger wiper box",
+      equipmentId: homogenizer.id,
+      partNumber: "GEA-PWB-140",
+      supplier: "GEA Parts Direct",
+      unitCost: 195,
+      leadTimeDays: 5,
+      lastReplaced: -200,
+      nextDue: 160,
+      failureProbability: 0.18,
       expectedDowntimeMin: 60,
+      zone: "liquid-end",
+      imageRef: "plunger-seal.jpg",
+      whyAtRisk:
+        "The soft parts in the wiper box harden and lose their seal over time, allowing product to migrate toward the crankcase. Rebuild annually.",
+    },
+    // Zone: power-end
+    {
+      name: "Crankcase oil",
+      equipmentId: homogenizer.id,
+      partNumber: "GEA-CO-300",
+      supplier: "Motion Industries",
+      unitCost: 95,
+      leadTimeDays: 2,
+      lastReplaced: -150,
+      nextDue: 35,
+      failureProbability: 0.47,
+      expectedDowntimeMin: 45,
+      zone: "power-end",
+      imageRef: "crankcase-oil.jpg",
+      whyAtRisk:
+        "Oil degrades and picks up water ingress from the pumped product, losing its film strength and accelerating bearing wear. Change every 6 months / 1,000 run-hours.",
+    },
+    {
+      name: "Oil filter cartridge",
+      equipmentId: homogenizer.id,
+      partNumber: "GEA-OF-301",
+      supplier: "Motion Industries",
+      unitCost: 70,
+      leadTimeDays: 2,
+      lastReplaced: -150,
+      nextDue: 35,
+      failureProbability: 0.39,
+      expectedDowntimeMin: 30,
+      zone: "power-end",
+      imageRef: "oil-filter.jpg",
+      whyAtRisk:
+        "A clogging cartridge restricts oil flow, reducing lubrication and bearing protection in the power end. Change every 6 months / 1,000 run-hours.",
+    },
+    // Zone: drive
+    {
+      name: "Drive V-belt",
+      equipmentId: homogenizer.id,
+      partNumber: "GEA-DB-051",
+      supplier: "Motion Industries",
+      unitCost: 130,
+      leadTimeDays: 3,
+      lastReplaced: -180,
+      nextDue: 120,
+      failureProbability: 0.24,
+      expectedDowntimeMin: 60,
+      zone: "drive",
+      imageRef: "drive-belt.jpg",
+      whyAtRisk:
+        "Tension loss and surface cracking from heat and load cycling cause the belt to slip and eventually snap, stopping the machine. Inspect periodically and replace at the first sign of glazing or cracking.",
     },
     // HTST Pasteurizer
     {
@@ -432,6 +565,9 @@ async function main() {
         nextDue: daysFromNow(p.nextDue),
         failureProbability: p.failureProbability,
         expectedDowntimeMin: p.expectedDowntimeMin,
+        whyAtRisk: p.whyAtRisk ?? null,
+        zone: p.zone ?? null,
+        imageRef: p.imageRef ?? null,
       },
     });
     createdParts[p.partNumber] = {
@@ -478,8 +614,8 @@ async function main() {
     },
     {
       type: "PM",
-      title: "Lubricate Homogenizer drive coupling",
-      partNumber: "GEA-DC-051",
+      title: "Inspect Homogenizer drive V-belt tension",
+      partNumber: "GEA-DB-051",
       equipmentId: homogenizer.id,
       scheduledDate: -1,
       status: "DONE",
@@ -534,11 +670,19 @@ async function main() {
       status: "OPEN",
     },
     {
-      type: "WORK_ORDER",
-      title: "Homogenizer piston seal kit replacement",
-      partNumber: "GEA-PS-118",
+      type: "PREDICTED_FAILURE",
+      title: "Replace Homogenizer plunger packings (HP seals)",
+      partNumber: "GEA-PP-118",
       equipmentId: homogenizer.id,
-      scheduledDate: 44,
+      scheduledDate: 4,
+      status: "OPEN",
+    },
+    {
+      type: "PM",
+      title: "Homogenizer crankcase oil & filter change",
+      partNumber: "GEA-CO-300",
+      equipmentId: homogenizer.id,
+      scheduledDate: 35,
       status: "OPEN",
     },
     {
