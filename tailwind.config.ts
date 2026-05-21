@@ -12,7 +12,8 @@ const config: Config = {
         navy: "#1b2f66", // primary — sidebar, headers
         "mid-blue": "#2f4a9e", // secondary
         sky: "#8fd4ef", // accent / highlight
-        "pale-blue": "#dff0fa", // surfaces
+        "pale-blue": "#dff0fa", // secondary accent surface
+        bone: "#f6f4ee", // page background
         // Risk colors (kept, tuned to brand)
         risk: {
           red: "#e23b3b",
