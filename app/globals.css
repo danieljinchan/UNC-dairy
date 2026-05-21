@@ -19,4 +19,9 @@ body {
   .unc-card {
     @apply rounded-2xl border border-sky/40 bg-white shadow-card;
   }
+
+  /* Consistent uppercase section label used across all pages */
+  .section-label {
+    @apply text-xs font-semibold uppercase tracking-wide text-navy/55;
+  }
 }
