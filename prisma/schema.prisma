@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Facility {
+  id                     String    @id @default(cuid())
+  name                   String
+  annualMaintenanceBudget Float
+  processes              Process[]
+}
+
+model Process {
+  id         String      @id @default(cuid())
+  name       String
+  facilityId String
+  facility   Facility    @relation(fields: [facilityId], references: [id])
+  equipment  Equipment[]
+}
+
+model Equipment {
+  id            String            @id @default(cuid())
+  name          String
+  manufacturer  String
+  processId     String
+  process       Process           @relation(fields: [processId], references: [id])
+  blueprintRef  String
+  cutSheetRef   String
+  unitsPerHour  Float
+  marginPerUnit Float
+  parts         Part[]
+  tasks         MaintenanceTask[]
+}
+
+model Part {
+  id                  String            @id @default(cuid())
+  name                String
+  equipmentId         String
+  equipment           Equipment         @relation(fields: [equipmentId], references: [id])
+  partNumber          String
+  supplier            String
+  unitCost            Float
+  leadTimeDays        Int
+  lastReplaced        DateTime
+  nextDue             DateTime
+  failureProbability  Float
+  expectedDowntimeMin Int
+  tasks               MaintenanceTask[]
+}
+
+model MaintenanceTask {
+  id            String    @id @default(cuid())
+  type          String // "PM" | "PREDICTED_FAILURE" | "WORK_ORDER"
+  title         String
+  partId        String?
+  part          Part?     @relation(fields: [partId], references: [id])
+  equipmentId   String
+  equipment     Equipment @relation(fields: [equipmentId], references: [id])
+  scheduledDate DateTime
+  status        String // "OPEN" | "DONE"
+}
