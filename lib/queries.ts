@@ -34,6 +34,7 @@ export type EquipmentWithRisk = {
   risk: RiskLevel;
   partCount: number;
   topCostOfInaction: number;
+  photoRef: string | null; // set => flagship equipment with interactive view
 };
 
 /** Processes for the facility, each with a rolled-up risk level. */
@@ -92,6 +93,7 @@ export async function getProcessDetail(processId: string) {
     id: eq.id,
     name: eq.name,
     manufacturer: eq.manufacturer,
+    photoRef: eq.photoRef,
     risk: equipmentRisk(eq.parts.map((p) => p.failureProbability)),
     partCount: eq.parts.length,
     topCostOfInaction: eq.parts.reduce(
@@ -138,6 +140,65 @@ export async function getEquipmentDetail(equipmentId: string) {
     parts,
     risk: equipmentRisk(equipment.parts.map((p) => p.failureProbability)),
   };
+}
+
+/** Serializable shape for the interactive homogenizer view (client component). */
+export type InteractivePart = {
+  id: string;
+  name: string;
+  partNumber: string;
+  supplier: string;
+  unitCost: number;
+  leadTimeDays: number;
+  lastReplaced: string; // ISO
+  nextDue: string; // ISO
+  failureProbability: number;
+  expectedDowntimeMin: number;
+  whyAtRisk: string | null;
+  zone: string | null;
+  imageRef: string | null;
+  risk: RiskLevel;
+  costOfInaction: number;
+};
+
+/**
+ * Builds the serializable payload for the interactive equipment view.
+ * Returns null when the equipment has no `photoRef` (non-flagship equipment
+ * keeps the simpler table layout).
+ */
+export async function getInteractiveEquipment(equipmentId: string) {
+  const equipment = await prisma.equipment.findUnique({
+    where: { id: equipmentId },
+    include: {
+      process: true,
+      parts: { orderBy: { failureProbability: "desc" } },
+    },
+  });
+  if (!equipment || !equipment.photoRef) return null;
+
+  const parts: InteractivePart[] = equipment.parts.map((p) => ({
+    id: p.id,
+    name: p.name,
+    partNumber: p.partNumber,
+    supplier: p.supplier,
+    unitCost: p.unitCost,
+    leadTimeDays: p.leadTimeDays,
+    lastReplaced: p.lastReplaced.toISOString(),
+    nextDue: p.nextDue.toISOString(),
+    failureProbability: p.failureProbability,
+    expectedDowntimeMin: p.expectedDowntimeMin,
+    whyAtRisk: p.whyAtRisk,
+    zone: p.zone,
+    imageRef: p.imageRef,
+    risk: riskLevel(p.failureProbability),
+    costOfInaction: costOfInaction(
+      p.expectedDowntimeMin,
+      equipment.unitsPerHour,
+      equipment.marginPerUnit
+    ),
+  }));
+
+  return { equipment, parts };
 }
 
 /** Single part detail with its equipment for cost calculations. */

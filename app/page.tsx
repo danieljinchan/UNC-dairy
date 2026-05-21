@@ -13,7 +13,7 @@ export default async function DashboardPage() {
   const facility = await getFacility();
   if (!facility) {
     return (
-      <div className="rounded-lg border border-amber-200 bg-amber-50 p-6 text-amber-800">
+      <div className="rounded-2xl border border-risk-amber/30 bg-risk-amber/10 p-6 text-navy">
         No facility found. Run <code className="font-mono">npm run seed</code> to
         load sample data.
       </div>
@@ -34,10 +34,12 @@ export default async function DashboardPage() {
   const shortfall = balance < 0;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       <header>
-        <h1 className="text-2xl font-bold text-slate-900">{facility.name}</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <h1 className="text-3xl font-bold tracking-tight text-navy">
+          {facility.name}
+        </h1>
+        <p className="mt-2 text-sm text-navy/55">
           Facility overview — processes, equipment risk roll-ups, and budget
           exposure.
         </p>
@@ -45,20 +47,20 @@ export default async function DashboardPage() {
 
       {/* Budget status banner */}
       <section
-        className={`rounded-lg border p-5 ${
+        className={`rounded-2xl border p-6 shadow-card ${
           shortfall
-            ? "border-red-200 bg-red-50"
-            : "border-green-200 bg-green-50"
+            ? "border-risk-red/30 bg-risk-red/10"
+            : "border-risk-green/30 bg-risk-green/10"
         }`}
       >
-        <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-6">
           <div>
-            <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <div className="text-xs font-semibold uppercase tracking-wide text-navy/55">
               Budget Status
             </div>
             <div
-              className={`mt-1 text-2xl font-bold ${
-                shortfall ? "text-red-700" : "text-green-700"
+              className={`mt-1 text-3xl font-bold ${
+                shortfall ? "text-risk-red" : "text-risk-green"
               }`}
             >
               {shortfall ? "Shortfall" : "Surplus"}{" "}
@@ -67,25 +69,26 @@ export default async function DashboardPage() {
           </div>
           <div className="flex gap-8 text-sm">
             <div>
-              <div className="text-slate-500">Annual budget</div>
-              <div className="font-semibold text-slate-900">
+              <div className="text-navy/55">Annual budget</div>
+              <div className="font-semibold text-navy">
                 {formatCurrency(facility.annualMaintenanceBudget)}
               </div>
             </div>
             <div>
-              <div className="text-slate-500">
-                Predicted-failure exposure
-              </div>
-              <div className="font-semibold text-slate-900">
+              <div className="text-navy/55">Predicted-failure exposure</div>
+              <div className="font-semibold text-navy">
                 {formatCurrency(predictedFailureCost)}
               </div>
             </div>
           </div>
         </div>
-        <p className="mt-3 text-sm text-slate-600">
-          Exposure is the total cost of inaction across all parts with a
-          failure probability of 30% or higher. See{" "}
-          <Link href="/budget" className="font-medium text-blue-600 underline">
+        <p className="mt-4 text-sm text-navy/65">
+          Exposure is the total cost of inaction across all parts with a failure
+          probability of 30% or higher. See{" "}
+          <Link
+            href="/budget"
+            className="font-semibold text-mid-blue underline"
+          >
             Budget
           </Link>{" "}
           for horizon breakdowns.
@@ -94,38 +97,36 @@ export default async function DashboardPage() {
 
       {/* Process cards */}
       <section>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-navy/60">
           Processes
         </h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {processes.map((proc) => (
             <Link
               key={proc.id}
               href={`/process/${proc.id}`}
-              className="group rounded-lg border border-slate-200 bg-white p-5 transition-shadow hover:shadow-md"
+              className="group unc-card p-6 transition-shadow hover:shadow-card-hover"
             >
-              <div className="flex items-start justify-between">
-                <h3 className="text-lg font-semibold text-slate-900 group-hover:text-blue-700">
+              <div className="flex items-start justify-between gap-3">
+                <h3 className="text-lg font-bold text-navy group-hover:text-mid-blue">
                   {proc.name}
                 </h3>
                 <RiskBadge level={proc.risk} />
               </div>
-              <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
+              <dl className="mt-5 grid grid-cols-2 gap-3 text-sm">
                 <div>
-                  <dt className="text-slate-500">Equipment</dt>
-                  <dd className="font-semibold text-slate-900">
+                  <dt className="text-navy/55">Equipment</dt>
+                  <dd className="font-semibold text-navy">
                     {proc.equipmentCount}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-slate-500">Tracked parts</dt>
-                  <dd className="font-semibold text-slate-900">
-                    {proc.partCount}
-                  </dd>
+                  <dt className="text-navy/55">Tracked parts</dt>
+                  <dd className="font-semibold text-navy">{proc.partCount}</dd>
                 </div>
                 <div className="col-span-2">
-                  <dt className="text-slate-500">Worst-case downtime cost</dt>
-                  <dd className="font-semibold text-slate-900">
+                  <dt className="text-navy/55">Worst-case downtime cost</dt>
+                  <dd className="font-semibold text-navy">
                     {formatCurrency(proc.topCostOfInaction)}
                   </dd>
                 </div>
