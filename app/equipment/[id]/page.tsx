@@ -307,6 +307,11 @@ export default async function EquipmentPage({
                   </span>
                 </div>
                 <div className="flex items-center gap-4 text-sm text-navy/55">
+                  {task.assignedTo && (
+                    <span className="rounded-full bg-pale-blue px-2.5 py-0.5 text-xs font-medium text-navy/70">
+                      {task.assignedTo.name}
+                    </span>
+                  )}
                   <span>{fmtDate(task.scheduledDate)}</span>
                   <span
                     className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${

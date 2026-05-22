@@ -120,7 +120,7 @@ export async function getEquipmentDetail(equipmentId: string) {
     include: {
       process: true,
       parts: { orderBy: { failureProbability: "desc" } },
-      tasks: { orderBy: { scheduledDate: "asc" } },
+      tasks: { orderBy: { scheduledDate: "asc" }, include: { assignedTo: true } },
     },
   });
   if (!equipment) return null;
@@ -238,14 +238,20 @@ export async function getAllPartsWithCost(facilityId: string) {
   }));
 }
 
-/** Maintenance tasks across the facility, with part + equipment context. */
+/** Maintenance tasks across the facility, with part + equipment + technician context. */
 export async function getTasks(facilityId: string) {
   return prisma.maintenanceTask.findMany({
     where: { equipment: { process: { facilityId } } },
     include: {
       part: true,
       equipment: { include: { process: true } },
+      assignedTo: true,
     },
     orderBy: { scheduledDate: "asc" },
   });
+}
+
+/** All technicians. */
+export async function getTechnicians() {
+  return prisma.technician.findMany({ orderBy: { name: "asc" } });
 }

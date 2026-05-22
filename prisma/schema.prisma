@@ -56,14 +56,23 @@ model Part {
   tasks               MaintenanceTask[]
 }
 
+model Technician {
+  id    String            @id @default(cuid())
+  name  String
+  role  String // e.g. "Lead Mechanic", "Electrical Tech"
+  tasks MaintenanceTask[]
+}
+
 model MaintenanceTask {
-  id            String    @id @default(cuid())
+  id            String      @id @default(cuid())
   type          String // "PM" | "PREDICTED_FAILURE" | "WORK_ORDER"
   title         String
   partId        String?
-  part          Part?     @relation(fields: [partId], references: [id])
+  part          Part?       @relation(fields: [partId], references: [id])
   equipmentId   String
-  equipment     Equipment @relation(fields: [equipmentId], references: [id])
+  equipment     Equipment   @relation(fields: [equipmentId], references: [id])
   scheduledDate DateTime
   status        String // "OPEN" | "DONE"
+  assignedToId  String?
+  assignedTo    Technician? @relation(fields: [assignedToId], references: [id])
 }

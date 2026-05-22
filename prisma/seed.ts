@@ -17,6 +17,21 @@ async function main() {
   await prisma.equipment.deleteMany();
   await prisma.process.deleteMany();
   await prisma.facility.deleteMany();
+  await prisma.technician.deleteMany();
+
+  // --- Technicians ---
+  const techMike = await prisma.technician.create({
+    data: { name: "Mike Rivera", role: "Lead Mechanic" },
+  });
+  const techSarah = await prisma.technician.create({
+    data: { name: "Sarah Chen", role: "Electrical Tech" },
+  });
+  const techJordan = await prisma.technician.create({
+    data: { name: "Jordan Okafor", role: "Preventive Maintenance" },
+  });
+  const techAlex = await prisma.technician.create({
+    data: { name: "Alex Petrov", role: "Reliability Engineer" },
+  });
 
   const facility = await prisma.facility.create({
     data: {
@@ -584,6 +599,7 @@ async function main() {
     equipmentId: string;
     scheduledDate: number;
     status: "OPEN" | "DONE";
+    assignedToId?: string;
   };
 
   const tasks: TaskSeed[] = [
@@ -595,6 +611,7 @@ async function main() {
       equipmentId: filler2.id,
       scheduledDate: 2,
       status: "OPEN",
+      assignedToId: techMike.id,
     },
     {
       type: "PM",
@@ -603,6 +620,7 @@ async function main() {
       equipmentId: cipPump.id,
       scheduledDate: 3,
       status: "OPEN",
+      assignedToId: techJordan.id,
     },
     {
       type: "WORK_ORDER",
@@ -611,6 +629,7 @@ async function main() {
       equipmentId: htst.id,
       scheduledDate: 4,
       status: "OPEN",
+      assignedToId: techSarah.id,
     },
     {
       type: "PM",
@@ -619,6 +638,7 @@ async function main() {
       equipmentId: homogenizer.id,
       scheduledDate: -1,
       status: "DONE",
+      assignedToId: techJordan.id,
     },
     // Next ~60 days
     {
@@ -628,6 +648,7 @@ async function main() {
       equipmentId: cipPump.id,
       scheduledDate: 18,
       status: "OPEN",
+      assignedToId: techMike.id,
     },
     {
       type: "PM",
@@ -636,6 +657,7 @@ async function main() {
       equipmentId: htst.id,
       scheduledDate: 12,
       status: "OPEN",
+      assignedToId: techAlex.id,
     },
     {
       type: "WORK_ORDER",
@@ -644,6 +666,7 @@ async function main() {
       equipmentId: casePacker.id,
       scheduledDate: 22,
       status: "OPEN",
+      assignedToId: techMike.id,
     },
     {
       type: "PM",
@@ -652,6 +675,7 @@ async function main() {
       equipmentId: cultureTank.id,
       scheduledDate: 28,
       status: "OPEN",
+      assignedToId: techJordan.id,
     },
     {
       type: "PREDICTED_FAILURE",
@@ -660,6 +684,7 @@ async function main() {
       equipmentId: separator.id,
       scheduledDate: 35,
       status: "OPEN",
+      assignedToId: techAlex.id,
     },
     {
       type: "PM",
@@ -668,6 +693,7 @@ async function main() {
       equipmentId: filler1.id,
       scheduledDate: 40,
       status: "OPEN",
+      assignedToId: techJordan.id,
     },
     {
       type: "PREDICTED_FAILURE",
@@ -676,6 +702,7 @@ async function main() {
       equipmentId: homogenizer.id,
       scheduledDate: 4,
       status: "OPEN",
+      assignedToId: techMike.id,
     },
     {
       type: "PM",
@@ -684,6 +711,7 @@ async function main() {
       equipmentId: homogenizer.id,
       scheduledDate: 35,
       status: "OPEN",
+      assignedToId: techJordan.id,
     },
     {
       type: "PREDICTED_FAILURE",
@@ -692,6 +720,7 @@ async function main() {
       equipmentId: htst.id,
       scheduledDate: 52,
       status: "OPEN",
+      assignedToId: techSarah.id,
     },
     {
       type: "PM",
@@ -700,6 +729,7 @@ async function main() {
       equipmentId: casePacker.id,
       scheduledDate: 58,
       status: "OPEN",
+      assignedToId: techJordan.id,
     },
     {
       type: "WORK_ORDER",
@@ -708,6 +738,7 @@ async function main() {
       equipmentId: filler2.id,
       scheduledDate: 9,
       status: "OPEN",
+      assignedToId: techAlex.id,
     },
   ];
 
@@ -721,6 +752,7 @@ async function main() {
         equipmentId: t.equipmentId,
         scheduledDate: daysFromNow(t.scheduledDate),
         status: t.status,
+        assignedToId: t.assignedToId ?? null,
       },
     });
   }

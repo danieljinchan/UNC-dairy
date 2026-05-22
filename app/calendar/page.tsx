@@ -1,5 +1,5 @@
 import { CalendarGrid, type CalendarTask } from "@/components/CalendarGrid";
-import { getFacility, getTasks } from "@/lib/queries";
+import { getFacility, getTasks, getTechnicians } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +20,10 @@ export default async function CalendarPage() {
     );
   }
 
-  const tasks = await getTasks(facility.id);
+  const [tasks, technicians] = await Promise.all([
+    getTasks(facility.id),
+    getTechnicians(),
+  ]);
 
   const calendarTasks: CalendarTask[] = tasks.map((t) => ({
     id: t.id,
@@ -30,7 +33,11 @@ export default async function CalendarPage() {
     href: t.partId
       ? `/part/${t.partId}`
       : `/equipment/${t.equipmentId}`,
+    technicianId: t.assignedTo?.id ?? null,
+    technicianName: t.assignedTo?.name ?? null,
   }));
+
+  const techOptions = technicians.map((t) => ({ id: t.id, name: t.name }));
 
   return (
     <div className="space-y-6">
@@ -53,7 +60,7 @@ export default async function CalendarPage() {
         ))}
       </div>
 
-      <CalendarGrid tasks={calendarTasks} />
+      <CalendarGrid tasks={calendarTasks} technicians={techOptions} />
     </div>
   );
 }
